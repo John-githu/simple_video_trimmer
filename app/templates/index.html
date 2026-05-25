@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>视频预览与剪裁</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <main class="layout">
+    <section class="panel panel-left">
+      <h1>视频剪裁工作台</h1>
+      <p class="hint">按文件独立保存剪裁设置，支持目录自动读取。</p>
+
+      <form id="sourceDirForm" class="card compact-card">
+        <label for="sourceDirInput">原视频目录（读取该目录下所有视频）</label>
+        <input id="sourceDirInput" type="text" placeholder="例如 H:\\去视频头\\原视频" />
+        <div class="row compact">
+          <button id="pickSourceDirBtn" type="button">选择目录</button>
+          <button id="saveSourceDirBtn" type="submit">保存目录并读取</button>
+          <button id="openSourceDirBtn" type="button">打开原视频目录</button>
+        </div>
+      </form>
+
+      <form id="outputDirForm" class="card compact-card">
+        <label for="outputDirInput">输出目录（默认 .\\新视频）</label>
+        <input id="outputDirInput" type="text" placeholder="例如 H:\\去视频头\\新视频" />
+        <div class="row compact">
+          <button id="pickOutputDirBtn" type="button">选择目录</button>
+          <button id="saveOutputDirBtn" type="submit">保存输出目录</button>
+          <button id="openOutputDirBtn" type="button">打开输出目录</button>
+        </div>
+      </form>
+
+      <section class="card list-card">
+        <div class="row row-space">
+          <h2>视频列表</h2>
+          <div class="row compact">
+            <label class="inline-label">显示
+              <select id="listSizeSelect">
+                <option value="14">14条</option>
+                <option value="24" selected>24条</option>
+                <option value="40">40条</option>
+                <option value="80">80条</option>
+              </select>
+            </label>
+            <button id="refreshBtn" type="button">刷新</button>
+            <button id="clearListBtn" type="button">清空视频列表</button>
+          </div>
+        </div>
+        <ul id="videoList" class="video-list"></ul>
+      </section>
+
+      <section class="card compact-card">
+        <h2>批量剪裁</h2>
+        <div class="row">
+          <label><input type="radio" name="batchMode" value="common" checked /> 统一参数</label>
+          <label><input type="radio" name="batchMode" value="individual" /> 各自参数</label>
+        </div>
+        <div id="commonBatchFields" class="grid-two">
+          <label>统一开始秒数<input id="batchStart" type="number" min="0" step="0.01" value="0" /></label>
+          <label>统一结束秒数<input id="batchEnd" type="number" min="0" step="0.01" value="0" /></label>
+        </div>
+        <button id="batchTrimBtn" type="button">执行批量剪裁</button>
+        <pre id="batchResult" class="output"></pre>
+      </section>
+    </section>
+
+    <section class="panel panel-right">
+      <section class="card">
+        <h2 id="activeTitle">未选择视频</h2>
+        <video id="previewVideo" controls preload="metadata"></video>
+        <div class="row row-space">
+          <span id="currentTimeLabel">当前: 00:00:00.000</span>
+          <span id="durationLabel">总长: 00:00:00.000</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="row row-space">
+          <h2>时间轴剪裁设置</h2>
+          <div class="row compact zoom-controls">
+            <button id="zoomOutBtn" type="button">-</button>
+            <input id="zoomSlider" type="range" min="1" max="20" step="0.5" value="1" />
+            <button id="zoomInBtn" type="button">+</button>
+            <span id="zoomValue">1x</span>
+          </div>
+        </div> 
+
+        <div class="timeline-shell">
+          <div id="timelineScroller" class="timeline-scroller">
+            <div id="timelineTrack" class="timeline-track">
+              <div id="timelineSelection" class="timeline-selection"></div>
+              <div id="timelineCursor" class="timeline-cursor"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sliders">
+          <label>开始拖拽
+            <input id="startSlider" type="range" min="0" max="0" step="0.01" value="0" />
+          </label>
+          <label>结束拖拽
+            <input id="endSlider" type="range" min="0" max="0" step="0.01" value="0" />
+          </label>
+        </div>
+
+        <div class="grid-two">
+          <label>开始时间（秒）
+            <input id="startInput" type="number" min="0" step="0.01" value="0" />
+          </label>
+          <label>结束时间（秒）
+            <input id="endInput" type="number" min="0" step="0.01" value="0" />
+          </label>
+        </div>
+
+        <div class="row compact">
+          <button id="setStartFromCurrent" type="button">取当前为开始</button>
+          <button id="setEndFromCurrent" type="button">取当前为结束</button>
+          <button id="saveSettingsBtn" type="button">保存当前视频设置</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>单个视频剪裁</h2>
+        <label>输出文件名（可选）
+          <input id="outputNameInput" type="text" placeholder="例如 episode_001_cut.mp4" />
+        </label>
+        <button id="singleTrimBtn" type="button">执行当前视频剪裁</button>
+        <pre id="singleResult" class="output"></pre>
+      </section>
+
+      <p id="statusBar" class="status"></p>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
